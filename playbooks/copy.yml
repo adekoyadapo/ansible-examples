@@ -1,0 +1,7 @@
+- hosts: dkr-rasberry
+  gather_facts: false
+  tasks:
+  - name: Copy file
+    copy:
+      src: /Users/adedapomola/Downloads/coffee.jpg
+      dest: /tmp/

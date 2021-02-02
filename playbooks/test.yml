@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Create Facts file
+      blockinfile:
+        path: /facts.txt
+        create: yes
+        block: |
+         Ansible managed node IP is {{ ansible_facts.default_ipv4.address }}

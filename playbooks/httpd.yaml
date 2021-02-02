@@ -1,0 +1,53 @@
+---
+- hosts: dev
+  become: true
+
+  tasks:
+    - name: Install prerequisites
+      apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+      loop: [ 'aptitude' ]
+
+  # Apache Configuration
+    - name: Install HTTPD and PHP Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'apache2', 'php', 'libapache2-mod-php' ]
+
+    - name: Create document root
+      file:
+        path: "/var/www/html/myroot"
+        state: directory
+        owner: "www-data"
+        group: "www-data"
+        mode: '0755'
+  # Change apache root
+    - name: Change apache Document Root
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^DocumentRoot'
+        insertafter: '#^DocumentRoot'
+        line: 'DocumentRoot “/var/www/html/myroot”'
+  # UFW Configuration
+    - name: "UFW - Allow HTTP on port 80"
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+  # PHP Info Page
+    - name: Sets Up PHP Info Page
+      template:
+        src: "templates/phpinfo.php.j2"
+        dest: "/var/www/html/myroot/phpinfo.php"
+        owner: "www-data"
+        group: "www-data"
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted

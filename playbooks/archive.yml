@@ -1,0 +1,18 @@
+---
+- hosts: dkr-rasberry
+  become: yes
+  gather_facts: true
+  vars:
+    params:
+      dkr-rasberry:
+        dirname: '/usr'
+        owner: ubuntu
+        group: ubuntu
+  tasks:
+  - name: Create archive
+    archive:
+      path: "{{ params[ansible_hostname]['dirname'] }}"
+      owner: "{{ params[ansible_hostname]['owner'] }}"
+      group: "{{ params[ansible_hostname]['group'] }}"
+      dest: /home/ubuntu/apps.tar.gz
+      format: gz

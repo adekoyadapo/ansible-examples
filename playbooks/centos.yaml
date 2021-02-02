@@ -1,0 +1,62 @@
+---
+- hosts: dev
+  become: true
+
+  tasks:
+    - name: Install prerequisites
+      yum: name={{ item }} state=present 
+      loop: [ 'epel-release' ]
+
+  # Apache Configuration
+    - name: Install httpd and PHP Packages
+      yum: name={{ item }} state=present
+      loop: [ 'httpd', 'php' ]
+
+    - name: Start httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Enable httpd port
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled
+
+    - name: Create document root
+      file:
+        path: "/var/www/html/myroot"
+        state: directory
+        owner: "apache"
+        group: "apache"
+        mode: '0755'
+  # Change apache root
+    - name: Change apache Document Root
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^DocumentRoot'
+        insertafter: '#^DocumentRoot'
+        line: 'DocumentRoot /var/www/html/myroot'
+      notify: 
+       - Reload Apache
+       - Restart Apache
+
+  # PHP Info Page
+    - name: Sets Up PHP Info Page
+      template:
+        src: "templates/phpinfo.php.j2"
+        dest: "/var/www/html/myroot/phpinfo.php"
+        owner: "apache"
+        group: "apache"
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: httpd
+        state: reloaded
+
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted

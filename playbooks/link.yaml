@@ -1,0 +1,22 @@
+---
+- hosts: dkr-rasberry
+  become: yes
+  gather_facts: true
+  vars:
+    params:
+      dkr-rasberry:
+        filename: store
+        owner: ubuntu
+        group: ubuntu
+  tasks:
+  - name: Create empty file
+    file:
+      path: "/tmp/devops/{{ params[ansible_hostname]['filename'] }}.txt"
+      owner: "{{ params[ansible_hostname]['owner'] }}"
+      group: "{{ params[ansible_hostname]['group'] }}"
+      state: touch
+  - name: Create Symlink
+    file:
+      dest: /home/ubuntu/test
+      src: /tmp/devops
+      state: link

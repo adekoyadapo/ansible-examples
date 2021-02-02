@@ -1,0 +1,23 @@
+---
+- hosts: dkr-rasberry
+  become: yes
+  gather_facts: true
+  vars:
+    params:
+      dkr-rasberry:
+        filename: store
+        entity: ubuntu
+        etype: user
+        permissions: rw
+  tasks:
+  - name: Create empty file
+    file:
+      path: "/tmp/{{ params[ansible_hostname]['filename'] }}.txt"
+      state: touch
+  - name: Set ACLs
+    acl:
+      path: "/tmp/{{ params[ansible_hostname]['filename'] }}.txt"
+      entity: "{{ params[ansible_hostname]['entity'] }}"
+      etype: "{{ params[ansible_hostname]['etype'] }}"
+      permissions: "{{ params[ansible_hostname]['permissions'] }}"
+      state: present

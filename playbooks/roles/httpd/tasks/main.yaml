@@ -1,0 +1,25 @@
+---
+- name: Install prerequisites
+  apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+  loop: [ 'aptitude' ]
+
+# Apache Configuration
+- name: Install HTTPD
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: [ 'apache2' ]
+
+# UFW Configuration
+- name: "UFW - Allow HTTP on port 80"
+  ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+
+# Index.html Page
+- name: Sets Up index.html
+  template:
+    src: "index.html.j2"
+    dest: "/var/www/html/index.html"
+    owner: "www-data"
+    group: "www-data"
+    mode: 0744

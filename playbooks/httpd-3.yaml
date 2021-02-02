@@ -1,0 +1,28 @@
+---
+- hosts: dev
+  become: true
+
+  tasks:
+    - name: Install prerequisites
+      apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+      loop: [ 'aptitude' ]
+
+  # Apache Configuration
+    - name: Install HTTPD and PHP Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'apache2' ]
+
+  # Create html file and add content
+    - name: Create html file with contents
+      blockinfile:
+        path: /var/www/html/index.html
+        mode: 0775
+        owner: www-data
+        group: www-data
+        create: yes
+        block: |
+             Welcome to xFusionCorp Industries!
+             
+             This is Nautilus sample file, created with Ansible!
+             
+             Please do not modify this file manually!

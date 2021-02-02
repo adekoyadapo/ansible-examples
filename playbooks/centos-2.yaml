@@ -1,0 +1,35 @@
+---
+- hosts: dev
+  become: true
+
+  tasks:
+    - name: Install prerequisites
+      yum: name={{ item }} state=present 
+      loop: [ 'epel-release' ]
+
+  # Apache Configuration
+    - name: Install httpd Packages
+      yum: name={{ item }} state=present
+      loop: [ 'httpd' ]
+
+    - name: Start httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+  # Create html file and add content
+    - name: Create html file with contents
+      copy:
+        dest: "/var/www/html/index.html"
+        content: "This is a Nautilus sample file, created using Ansible!\n"
+        owner: "www-data"
+        group: "www-data"
+        mode: '0655'
+
+  # Update content in html file
+    - name: Update content in html file
+      lineinfile:
+        path: /var/www/html/index.html
+        line: 'Welcome to xFusionCorp Industries!'
+        insertbefore: This*
